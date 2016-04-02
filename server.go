@@ -2,40 +2,37 @@ package main
 
 import (
     "fmt"
-    "github.com/drone/routes"
     "net/http"
+    "strings"
+    "log"
 )
 
-func getuser(w http.ResponseWriter, r *http.Request) {
-    params := r.URL.Query()
-    uid := params.Get(":uid")
-    fmt.Fprintf(w, "you are get user %s", uid)
+func sayhelloName(w http.ResponseWriter, r *http.Request) {
+  //  r.ParseForm()  // parse arguments, you have to call this by yourself
+
+    fmt.Fprintf(w, "Hello astaxie!") // send data to client side
 }
 
-func modifyuser(w http.ResponseWriter, r *http.Request) {
-    params := r.URL.Query()
-    uid := params.Get(":uid")
-    fmt.Fprintf(w, "you are modify user %s", uid)
+
+func sayhelloNum(w http.ResponseWriter, r *http.Request) {
+    r.ParseForm()  // parse arguments, you have to call this by yourself
+    fmt.Println(r.Form)  // print form information in server side
+    fmt.Println("path", r.URL.Path)
+    fmt.Println("scheme", r.URL.Scheme)
+    fmt.Println(r.Form["url_long"])
+    for k, v := range r.Form {
+        fmt.Println("key:", k)
+        fmt.Println("val:", strings.Join(v, ""))
+    }
+    fmt.Fprintf(w, "Hello 8") // send data to client side
 }
 
-func deleteuser(w http.ResponseWriter, r *http.Request) {
-    params := r.URL.Query()
-    uid := params.Get(":uid")
-    fmt.Fprintf(w, "you are delete user %s", uid)
-}
-
-func adduser(w http.ResponseWriter, r *http.Request) {
-    params := r.URL.Query()
-    uid := params.Get(":uid")
-    fmt.Fprint(w, "you are add user %s", uid)
-}
 
 func main() {
-    mux := routes.New()
-    mux.Get("/user/:uid", getuser)
-    mux.Post("/user/:uid", modifyuser)
-    mux.Del("/user/:uid", deleteuser)
-    mux.Put("/user/", adduser)
-    http.Handle("/", mux)
-    http.ListenAndServe(":8088", nil)
+    http.HandleFunc("/", sayhelloName) // set router
+    http.HandleFunc("/num", sayhelloNum) // set router
+    err := http.ListenAndServe(":9090", nil) // set listen port
+    if err != nil {
+        log.Fatal("ListenAndServe: ", err)
+    }
 }
